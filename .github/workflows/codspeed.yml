@@ -1,0 +1,40 @@
+name: CodSpeed
+'on':
+  push:
+    branches:
+    - main
+  pull_request: null
+  workflow_dispatch: null
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_RETRY: 10
+  RUSTUP_MAX_RETRIES: 10
+  RUST_BACKTRACE: short
+jobs:
+  codspeed:
+    name: Run benchmarks
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+    - uses: dtolnay/rust-toolchain@4305c38b25d97ef35a8ad1f985ccf2d2242004f2
+    - uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5
+      with:
+        cache-targets: release
+    - name: Install cargo-codspeed
+      uses: taiki-e/install-action@331a600f1b10a3fed8dc56f925012bede91ae51f
+      with:
+        tool: cargo-codspeed@4.2.1
+    - name: Build the benchmark target(s)
+      run: cargo codspeed build -p sqruff-lib
+    - name: Run the benchmarks
+      uses: CodSpeedHQ/action@4.5.2
+      with:
+        upload-url: ${{ secrets.CODSPEED_STAGING_UPLOAD_URL }}
+        mode: simulation
+        run: cargo codspeed run -p sqruff-lib
