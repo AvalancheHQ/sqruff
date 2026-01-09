@@ -33,7 +33,7 @@ jobs:
     - name: Build the benchmark target(s)
       run: cargo codspeed build -p sqruff-lib
     - name: Run the benchmarks
-      uses: CodSpeedHQ/action@4.5.2
+      uses: CodSpeedHQ/action@dbda7111f8ac363564b0c51b992d4ce76bb89f2f
       with:
         upload-url: ${{ secrets.CODSPEED_STAGING_UPLOAD_URL }}
         mode: simulation
